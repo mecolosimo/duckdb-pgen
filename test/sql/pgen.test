@@ -1,0 +1,23 @@
+# name: test/sql/pgen.test
+# description: test pgen extension
+# group: [sql]
+
+# Before we load the extension, this will fail
+statement error
+SELECT pgen('Sam');
+----
+Catalog Error: Scalar Function with name pgen does not exist!
+
+# Require statement will ensure this test is run with this extension loaded
+require pgen
+
+# Confirm the extension works
+query I
+SELECT pgen('Sam');
+----
+Pgen Sam 🐥
+
+query I
+SELECT pgen_openssl_version('Michael') ILIKE 'Pgen Michael, my linked OpenSSL version is OpenSSL%';
+----
+true
