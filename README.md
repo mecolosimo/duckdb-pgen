@@ -1,86 +1,42 @@
-# Pgen
+# Duckdb Extension for reading PLINK2 pgen files
 
-This repository is based on https://github.com/duckdb/extension-template, check it out if you want to build and ship your own DuckDB extension.
+[PLINK2](https://www.cog-genomics.org/plink/2.0/) pgen files are more like a container that can contain genomic data in various forms (modes). This only reads a subset. Reguardless of type of pgen, max number of variants is 2,147,483,645 (0x7ffffffd) anf max number of samples is 2,147,483,645 (0x7ffffffe).
 
----
+**NOT FULLY IMPLEMENTED**
 
-This extension, Pgen, allow you to ... <extension_goal>.
+## Install
 
+For developing see [duckdb-extension](./README-duckdb-extension.md) docs.
 
-## Building
-### Managing dependencies
-DuckDB extensions uses VCPKG for dependency management. Enabling VCPKG is very simple: follow the [installation instructions](https://vcpkg.io/en/getting-started) or just run the following:
-```shell
-git clone https://github.com/Microsoft/vcpkg.git
-./vcpkg/bootstrap-vcpkg.sh
-export VCPKG_TOOLCHAIN_PATH=`pwd`/vcpkg/scripts/buildsystems/vcpkg.cmake
-```
-Note: VCPKG is only required for extensions that want to rely on it for dependency management. If you want to develop an extension without dependencies, or want to do your own dependency management, just skip this step. Note that the example extension uses VCPKG to build with a dependency for instructive purposes, so when skipping this step the build may not work without removing the dependency.
-
-### Build steps
-Now to build the extension, run:
-```sh
-make
-```
-The main binaries that will be built are:
-```sh
-./build/release/duckdb
-./build/release/test/unittest
-./build/release/extension/pgen/pgen.duckdb_extension
-```
-- `duckdb` is the binary for the duckdb shell with the extension code automatically loaded.
-- `unittest` is the test runner of duckdb. Again, the extension is already linked into the binary.
-- `pgen.duckdb_extension` is the loadable binary as it would be distributed.
+TBD
 
 ## Running the extension
-To run the extension code, simply start the shell with `./build/release/duckdb`.
 
-Now we can use the features from the extension directly in DuckDB. The template contains a single scalar function `pgen()` that takes a string arguments and returns a string:
-```
-D select pgen('Jane') as result;
-┌───────────────┐
-│    result     │
-│    varchar    │
-├───────────────┤
-│ Pgen Jane 🐥 │
-└───────────────┘
-```
+With extension loaded and in the root direcotry of the extension 
 
-## Running the tests
-Different tests can be created for DuckDB extensions. The primary way of testing DuckDB extensions should be the SQL tests in `./test/sql`. These SQL tests can be run using:
-```sh
-make test
-```
-
-### Installing the deployed binaries
-To install your extension binaries from S3, you will need to do two things. Firstly, DuckDB should be launched with the
-`allow_unsigned_extensions` option set to true. How to set this will depend on the client you're using. Some examples:
-
-CLI:
-```shell
-duckdb -unsigned
-```
-
-Python:
-```python
-con = duckdb.connect(':memory:', config={'allow_unsigned_extensions' : 'true'})
-```
-
-NodeJS:
-```js
-db = new duckdb.Database(':memory:', {"allow_unsigned_extensions": "true"});
-```
-
-Secondly, you will need to set the repository endpoint in DuckDB to the HTTP url of your bucket + version of the extension
-you want to install. To do this run the following SQL query in DuckDB:
 ```sql
-SET custom_extension_repository='bucket.s3.eu-west-1.amazonaws.com/<your_extension_name>/latest';
+CREATE TEMP TABLE psam AS SELECT row_number() OVER () AS sample_number, * FROM
+    read_csv('test-data/example.psam',
+        delim = '\t',
+        header = true,
+        columns = {
+            'IID': 'VARCHAR',
+            'SEX': 'VARCHAR'
+        });
+CREATE TEMP TABLE pvar AS SELECT row_number() OVER () AS sample_number, * FROM
+    read_csv('test-data/example.pvar',
+        delim = '\t',
+        header = true,
+        nullstr = ".",
+        columns = {
+            'CHROM': 'VARCHAR',
+            'POS': 'VARCHAR',
+            'ID': 'VARCHAR',
+            'REF': 'VARCHAR',
+            'ALT': 'VARCHAR',
+            'QUAL': 'VARCHAR',
+            'FILTERD': 'VARCHAR'
+        });
+CREATE TEMP TABLE pgen AS SELECT * FROM read_pgen('test-data/example.pgen');
 ```
-Note that the `/latest` path will allow you to install the latest extension version available for your current version of
-DuckDB. To specify a specific version, you can pass the version instead.
 
-After running these steps, you can install and load your extension using the regular INSTALL/LOAD commands in DuckDB:
-```sql
-INSTALL pgen
-LOAD pgen
-```
