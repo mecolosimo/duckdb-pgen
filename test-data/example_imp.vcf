@@ -1,0 +1,6 @@
+##fileformat=VCFv4.2
+##FORMAT=<ID=GT,Type=String,Number=1,Description="Threshholded genotype call">
+##FORMAT=<ID=GP,Type=Float,Number=G,Description="Genotype call probabilities">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	10	23	-1	12	11	24
+2	4	2:4:T:C	T	C	.	.	.	GT:GP	1/1:0.0000,0.0039,0.9961	1/1:0.0000,0.0157,0.9843	0/0:0.9961,0.0039,0.0000	./.:0.2588,0.5058,0.2354	0/1:0.0039,0.9843,0.0118	0/1:0.2371,0.5058,0.2571
+12	1984	12:1984:C:T	C	T	.	.	.	GT:GP	./.:.	0/0:0.9882,0.0118,0.0000	1/1:0.0000,0.0235,0.9765	0/1:0.0000,0.9961,0.0039	0/0:0.9882,0.0118,0.0000	1/1:0.0000,0.0078,0.9922
